@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS Kabupaten Asahan</title>
+
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        h2 {
+            text-align: center;
+            padding: 12px;
+            margin: 0;
+            background: #ae4192;
+            color: white;
+        }
+
+        #map {
+            height: 90vh;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Persebaran BUMDES Kabupaten Asahan Tahun 2026</h2>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+
+        // 1. Membuat peta
+        var map = L.map('map').setView([2.98, 99.62], 10);
+
+        // 2. Basemap OpenStreetMap
+        var osm = L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                attribution: '&copy; OpenStreetMap contributors'
+            }
+        ).addTo(map);
+
+        // 3. GeoServer lokal
+        var geoserver = 'http://localhost:8080/geoserver/pgweb/wms';
+
+        // 4. Layer administrasi kecamatan
+        var administrasi = L.tileLayer.wms(geoserver, {
+            layers: 'pgweb:ADMINISTRASIKECAMATAN_AR_50K',
+            format: 'image/png',
+            transparent: true
+        }).addTo(map);
+
+        // 5. Layer jaringan jalan
+        var jalan = L.tileLayer.wms(geoserver, {
+            layers: 'pgweb:JALAN_LN_50K',
+            format: 'image/png',
+            transparent: true
+        }).addTo(map);
+
+        // 6. GeoServer Geoportal Kabupaten Asahan
+        var geoserverAsahan =
+            'https://geoportal.asahankab.go.id/geoserver/geonode/kondisi_bumdes_2026/ows';
+
+        // 7. Layer kondisi BUMDes 2026
+        var bumdes = L.tileLayer.wms(geoserverAsahan, {
+            layers: 'geonode:kondisi_bumdes_2026',
+            format: 'image/png',
+            transparent: true,
+            version: '1.1.1'
+        });
+
+        // 8. Basemap
+        var baseMaps = {
+            "OpenStreetMap": osm
+        };
+
+        // 9. Overlay Maps
+        var overlayMaps = {
+            "Administrasi Kecamatan": administrasi,
+            "Jaringan Jalan": jalan,
+            "Kondisi BUMDes 2026": bumdes
+        };
+
+        // 10. Kontrol layer
+        L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+        // 11. Skala peta
+        L.control.scale().addTo(map);
+
+    </script>
+
+</body>
+</html>
